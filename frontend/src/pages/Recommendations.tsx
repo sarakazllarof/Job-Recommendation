@@ -117,8 +117,8 @@ function Recommendations() {
         </Box>
         <Grid container spacing={3}>
           {recommendations.map((recommendation) => (
-            <Grid item xs={12} key={recommendation.job_id}>
-              <Card elevation={3} sx={{ borderRadius: 4, transition: 'transform 0.2s, box-shadow 0.2s', boxShadow: '0 4px 24px 0 rgba(31, 38, 135, 0.08)', '&:hover': { transform: 'translateY(-4px)', boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.12)' }, bgcolor: '#f8fafc' }}>
+            <Grid key={recommendation.job_id}>
+              <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
                 <CardContent>
                   <Box display="flex" justifyContent="space-between" alignItems="flex-start">
                     <Box display="flex" alignItems="center" gap={1}>

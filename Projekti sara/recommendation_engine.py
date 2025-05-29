@@ -5,14 +5,9 @@ from sqlalchemy.orm import Session
 from models import Job, User, CV, Recommendation
 import datetime
 
-import json
-
-
-
 class JobRecommender:
     def __init__(self):
         self.model = SentenceTransformer('all-MiniLM-L6-v2')
-
 
     def get_embeddings(self, text: str) -> np.ndarray:
         return self.model.encode(text)
@@ -20,16 +15,13 @@ class JobRecommender:
     def calculate_similarity(self, vec1: np.ndarray, vec2: np.ndarray) -> float:
         return float(np.dot(vec1, vec2) / (np.linalg.norm(vec1) * np.linalg.norm(vec2)))
 
-
     def get_user_profile(self, user: User, db: Session) -> str:
         latest_cv = db.query(CV).filter(CV.user_id == user.id).order_by(CV.created_at.desc()).first()
         if not latest_cv or not latest_cv.parsed_data:
             return ""
 
-        try:
-            cv_data = json.loads(latest_cv.parsed_data)
-        except Exception:
-            return ""
+        # FIXED: parsed_data is already a dict, no need for json.loads
+        cv_data = latest_cv.parsed_data  
 
         profile_parts = []
 
@@ -40,15 +32,8 @@ class JobRecommender:
         if 'education' in cv_data:
             profile_parts.append("Education: " + " ".join(cv_data['education']))
 
-
         return " ".join(profile_parts)
 
-    def get_job_embedding(self, job: Job) -> np.ndarray:
-        job_text = f"{job.title} {job.description}"
-        return self.get_embeddings(job_text)
-
-
-        return " ".join(profile_parts)
     def get_job_embedding(self, job: Job) -> np.ndarray:
         job_text = f"{job.title} {job.description}"
         return self.get_embeddings(job_text)
@@ -57,12 +42,6 @@ class JobRecommender:
         user_profile = self.get_user_profile(user, db)
         if not user_profile:
             return []
-
-
-        user_embedding = self.get_embeddings(user_profile)
-        jobs = db.query(Job).all()
-        job_scores = []
-
 
         user_embedding = self.get_embeddings(user_profile)
         jobs = db.query(Job).all()
@@ -73,7 +52,6 @@ class JobRecommender:
             similarity = self.calculate_similarity(user_embedding, job_embedding)
             job_scores.append({
                 'job': job,
-
                 'score': similarity
             })
 
@@ -84,7 +62,6 @@ class JobRecommender:
             recommendation = Recommendation(
                 user_id=user.id,
                 job_id=rec['job'].id,
-
                 score=rec['score'],
                 created_at=datetime.datetime.utcnow()
             )
@@ -92,9 +69,6 @@ class JobRecommender:
 
         db.commit()
 
-
-        db.add(recommendation)
-        db.commit()
         return [{
             'job_id': rec['job'].id,
             'title': rec['job'].title,
@@ -102,8 +76,5 @@ class JobRecommender:
             'similarity_score': rec['score']
         } for rec in top_recommendations]
 
-
+# Create an instance outside so you can reuse it
 recommender = JobRecommender()
-
-recommender = JobRecommender() 
-
