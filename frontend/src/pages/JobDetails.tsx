@@ -24,6 +24,7 @@ function JobDetails() {
   const [job, setJob] = useState<Job | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -50,7 +51,7 @@ function JobDetails() {
 
     try {
       await axios.put(`http://localhost:8000/jobs/recommendations/${id}/apply/`);
-      // Handle successful application
+      setSuccess('Applied successfully!');
     } catch (err) {
       setError('Failed to apply for the job');
     }
@@ -69,6 +70,16 @@ function JobDetails() {
       <Container>
         <Alert severity="error" sx={{ mt: 2 }}>
           {error}
+        </Alert>
+      </Container>
+    );
+  }
+
+  if (success) {
+    return (
+      <Container>
+        <Alert severity="success" sx={{ mt: 2 }}>
+          {success}
         </Alert>
       </Container>
     );
