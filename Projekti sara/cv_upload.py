@@ -1,5 +1,5 @@
 from fastapi import APIRouter, UploadFile, File, Depends, HTTPException, status
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
 import spacy
 import os
 import tempfile
@@ -18,6 +18,9 @@ nlp = spacy.load("en_core_web_sm")
 
 # Create router
 router = APIRouter()
+
+UPLOAD_DIR = "uploads"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 def get_db():
     db = SessionLocal()
@@ -74,36 +77,31 @@ async def upload_cv(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    if not file.filename.endswith(('.pdf', '.docx', '.txt')):
+    if not file.filename.endswith((".pdf", ".docx", ".txt")):
         raise HTTPException(status_code=400, detail="File must be a PDF, DOCX, or TXT file.")
-    
-    # Save the uploaded file temporarily
-    with tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(file.filename)[1]) as temp_file:
+
+    # Save the uploaded file permanently
+    save_path = os.path.join(UPLOAD_DIR, f"user{current_user.id}_{file.filename}")
+    with open(save_path, "wb") as f:
         content = await file.read()
-        temp_file.write(content)
-        temp_file_path = temp_file.name
-    
-    try:
-        # Parse the CV based on file type
-        file_type = os.path.splitext(file.filename)[1][1:]  # Get extension without dot
-        cv_data = parse_cv(temp_file_path, file_type)
-        
-        # Save CV data to database
-        db_cv = CV(
-            user_id=current_user.id,
-            filename=file.filename,
-            file_type=file_type,
-            parsed_data=cv_data
-        )
-        db.add(db_cv)
-        db.commit()
-        db.refresh(db_cv)
-        
-        return JSONResponse(content=cv_data)
-    
-    finally:
-        # Clean up the temporary file
-        os.unlink(temp_file_path)
+        f.write(content)
+
+    # Parse the CV as before (use save_path)
+    file_type = os.path.splitext(file.filename)[1][1:]
+    cv_data = parse_cv(save_path, file_type)
+
+    db_cv = CV(
+        user_id=current_user.id,
+        filename=file.filename,
+        file_type=file_type,
+        parsed_data=cv_data,
+        file_path=save_path  # Save the file path
+    )
+    db.add(db_cv)
+    db.commit()
+    db.refresh(db_cv)
+
+    return JSONResponse(content=cv_data)
 
 def parse_cv(file_path: str, file_type: str) -> Dict[str, Any]:
     # Read the file content based on file type
@@ -164,3 +162,16 @@ async def delete_cv(
     db.commit()
     return
 
+@router.get("/download-cv/{cv_id}/")
+async def download_cv(
+    cv_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    cv = db.query(CV).filter(CV.id == cv_id, CV.user_id == current_user.id).first()
+    print(f"Trying to download file at: {cv.file_path if cv else 'No CV found'}")
+    if not cv or not os.path.exists(cv.file_path):
+        print("File not found or path does not exist!")
+        raise HTTPException(status_code=404, detail="File not found")
+    print("File found, sending file.")
+    return FileResponse(cv.file_path, filename=cv.filename)

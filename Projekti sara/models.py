@@ -60,4 +60,5 @@ class CV(Base):
     file_type = Column(String(10), nullable=False)
     parsed_data = Column(JSON, nullable=False)  # Store as JSON
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    file_path = Column(String(255), nullable=False)
     user = relationship('User', back_populates='cvs') 

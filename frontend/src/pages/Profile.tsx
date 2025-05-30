@@ -20,6 +20,7 @@ import AccountCircleRoundedIcon from '@mui/icons-material/AccountCircleRounded';
 import EmailRoundedIcon from '@mui/icons-material/EmailRounded';
 import BadgeRoundedIcon from '@mui/icons-material/BadgeRounded';
 import WorkRoundedIcon from '@mui/icons-material/WorkRounded';
+import { useNavigate } from 'react-router-dom';
 
 interface CV {
   id: number;
@@ -34,6 +35,7 @@ function Profile() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [uploadSuccess, setUploadSuccess] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchCVs = async () => {
@@ -180,6 +182,16 @@ function Profile() {
                                 Uploaded on {new Date(cv.created_at).toLocaleDateString()} | {cv.file_type.toUpperCase()}
                               </Typography>
                             </Box>
+                          </Box>
+                          <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
+                            <Button
+                              variant="contained"
+                              color="primary"
+                              onClick={() => navigate(`/cv/${cv.id}`)}
+                              sx={{ borderRadius: 99, fontWeight: 700, px: 3, py: 1 }}
+                            >
+                              View Details
+                            </Button>
                           </Box>
                         </CardContent>
                       </Card>

@@ -48,4 +48,5 @@ class CVSchema(BaseModel):
     filename: str
     file_type: str
     parsed_data: Optional[dict]
-    created_at: datetime.datetime 
+    created_at: datetime.datetime
+    file_path: str 

@@ -227,11 +227,7 @@ function JobSearch() {
                       </Typography>
                     </Box>
                     <Box>
-                      <Chip
-                        label={job.job_type}
-                        color="primary"
-                        sx={{ fontWeight: 700, fontSize: 14, px: 1.5, py: 0.5, borderRadius: 2 }}
-                      />
+                      {/* Removed Chip that rendered the empty blue circle */}
                     </Box>
                   </Box>
                   <Typography
