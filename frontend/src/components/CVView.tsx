@@ -197,27 +197,6 @@ const CVView: React.FC = () => {
           )}
         </Box>
 
-        {/* Entities Section */}
-        <Box mb={4}>
-          <Typography variant="h6" fontWeight={700} color="primary" mb={2}>
-            Extracted Information
-          </Typography>
-          <Grid container spacing={2}>
-            {Object.entries(cv.parsed_data.entities).map(([key, value]) => (
-              <Grid item xs={12} sm={6} md={4} key={key}>
-                <Paper elevation={1} sx={{ p: 2, borderRadius: 3, bgcolor: '#f3f6fa' }}>
-                  <Typography variant="subtitle2" color="text.secondary" fontWeight={600} mb={1}>
-                    {key}
-                  </Typography>
-                  <Typography variant="body2" color="text.primary">
-                    {value}
-                  </Typography>
-                </Paper>
-              </Grid>
-            ))}
-          </Grid>
-        </Box>
-
         {/* Content Preview */}
         <Box>
           <Typography variant="h6" fontWeight={700} color="primary" mb={2}>

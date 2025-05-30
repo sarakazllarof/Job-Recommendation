@@ -8,7 +8,7 @@ class UserSchema(BaseModel):
     username: str
     email: EmailStr
     is_admin: bool
-    created_at: datetime.datetime
+    created_at: Optional[datetime.datetime] = None
 
 class JobSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
