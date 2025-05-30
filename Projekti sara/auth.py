@@ -36,7 +36,7 @@ class UserResponse(BaseModel):
     is_admin: bool
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class Token(BaseModel):
     access_token: str
@@ -46,10 +46,13 @@ class TokenData(BaseModel):
     email: Optional[str] = None
 
 class UserUpdate(BaseModel):
-    username: str
-    email: EmailStr
-    is_admin: bool
+    username: Optional[str] = None
+    email: Optional[EmailStr] = None
+    is_admin: Optional[bool] = None
     bio: Optional[str] = None
+
+    class Config:
+        extra = "forbid"
 
 # Helper functions
 def verify_password(plain_password, hashed_password):
@@ -136,6 +139,28 @@ def get_all_users(current_user: User = Depends(get_current_user), db: Session = 
     users = db.query(User).all()
     return users
 
+@router.put("/users/me", response_model=UserResponse)
+def update_user_profile(
+    user_update: UserUpdate = Body(...),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    print("Received update payload:", user_update.dict())
+    user = db.query(User).filter(User.id == current_user.id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    if user_update.username is not None:
+        user.username = user_update.username
+    if user_update.email is not None:
+        user.email = user_update.email
+    if user_update.is_admin is not None:
+        user.is_admin = user_update.is_admin
+    if user_update.bio is not None:
+        user.bio = user_update.bio
+    db.commit()
+    db.refresh(user)
+    return UserResponse.from_orm(user)
+
 @router.put("/users/{user_id}", response_model=UserSchema)
 def update_user(user_id: int = Path(...), user_update: UserUpdate = None, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     if not current_user.is_admin:
@@ -205,24 +230,3 @@ def get_admin_stats(current_user: User = Depends(get_current_user), db: Session 
         "top_skills": top_skills,
         "top_locations": top_locations,
     }
-
-@router.put("/users/me", response_model=UserResponse)
-def update_user_profile(
-    user_update: UserUpdate = Body(...),
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-):
-    user = db.query(User).filter(User.id == current_user.id).first()
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    if user_update.username is not None:
-        user.username = user_update.username
-    if user_update.email is not None:
-        user.email = user_update.email
-    if user_update.is_admin is not None:
-        user.is_admin = user_update.is_admin
-    if user_update.bio is not None:
-        user.bio = user_update.bio
-    db.commit()
-    db.refresh(user)
-    return user

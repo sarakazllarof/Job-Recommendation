@@ -10,47 +10,9 @@ import WorkOutlineRoundedIcon from '@mui/icons-material/WorkOutlineRounded';
 import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
 import Tooltip from '@mui/material/Tooltip';
 import Fade from '@mui/material/Fade';
-import Carousel from 'react-material-ui-carousel';
-import Slider from 'react-slick';
-import 'slick-carousel/slick/slick.css';
-import 'slick-carousel/slick/slick-theme.css';
-import { useState, useRef } from 'react';
-
-const testimonials = [
-  {
-    name: 'Sara K.',
-    text: 'I found my dream job within a week! The recommendations were spot on.',
-  },
-  {
-    name: 'Matias D.',
-    text: 'Uploading my CV was so easy, and I got matched with great companies.',
-  },
-  {
-    name: 'John Smith',
-    text: 'The platform helped me land a job at a top tech company. Great experience!',
-  },
-  {
-    name: 'Emma Johnson',
-    text: 'I love how personalized the job recommendations are. It made my job search so much easier.',
-  },
-  {
-    name: 'Michael Brown',
-    text: 'The user interface is intuitive and the support team is very helpful.',
-  },
-  {
-    name: 'Sophia Lee',
-    text: 'I was able to find a job that perfectly matches my skills and interests.',
-  },
-  {
-    name: 'David Wilson',
-    text: 'The analytics dashboard is a game-changer for tracking my job search progress.',
-  },
-];
 
 const Home: React.FC = () => {
   const { user } = useAuth();
-  const [testimonialIndex, setTestimonialIndex] = useState(0);
-  const sliderRef = useRef<any>(null);
 
   return (
     <Box
@@ -84,7 +46,7 @@ const Home: React.FC = () => {
       </Box>
       <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
         <Grid container spacing={4} alignItems="center" justifyContent="center">
-          <Grid item xs={12} md={6}>
+          <Grid>
             <Box sx={{ textAlign: { xs: 'center', md: 'left' } }}>
               <Box display="flex" alignItems="center" gap={2} mb={1}>
                 <WorkOutlineRoundedIcon color="primary" sx={{ fontSize: 40 }} />
@@ -195,7 +157,7 @@ const Home: React.FC = () => {
             </Box>
           </Grid>
 
-          <Grid item xs={12} md={6}>
+          <Grid>
             <Paper
               elevation={0}
               sx={{
@@ -242,7 +204,7 @@ const Home: React.FC = () => {
                       tooltip: 'Our AI matches you with the best jobs.',
                     },
                   ].map((step, idx) => (
-                    <Grid item xs={12} md={4} key={step.title}>
+                    <Grid key={step.title}>
                       <Fade in timeout={600 + idx * 200}>
                         <Box
                           tabIndex={0}
@@ -304,61 +266,6 @@ const Home: React.FC = () => {
                 >
                   Get Started
                 </Button>
-              </Box>
-              {/* Testimonials Carousel */}
-              <Box mt={8}>
-                <Typography variant="h4" fontWeight={700} align="center" mb={3}>
-                  Success Stories
-                </Typography>
-                <Slider
-                  dots={false}
-                  infinite={true}
-                  speed={500}
-                  slidesToShow={1}
-                  slidesToScroll={1}
-                  arrows={false}
-                  autoplay={true}
-                  autoplaySpeed={6000}
-                  beforeChange={(_: number, next: number) => setTestimonialIndex(next)}
-                  afterChange={setTestimonialIndex}
-                  ref={sliderRef}
-                >
-                  {testimonials.map((t, i) => (
-                    <Paper key={i} sx={{ p: 4, borderRadius: 4, boxShadow: 2, textAlign: 'center', bgcolor: 'white', minHeight: 140, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                      <Typography variant="h6" fontWeight={700} mb={1}>
-                        {t.name}
-                      </Typography>
-                      <Typography color="text.secondary">{t.text}</Typography>
-                    </Paper>
-                  ))}
-                </Slider>
-                <Box display="flex" justifyContent="center" alignItems="center" gap={2} mt={3}>
-                  {testimonials.map((_, idx) => (
-                    <Button
-                      key={idx}
-                      onClick={() => sliderRef.current && sliderRef.current.slickGoTo(idx)}
-                      sx={{
-                        width: 32,
-                        height: 32,
-                        minWidth: 0,
-                        borderRadius: '50%',
-                        bgcolor: testimonialIndex === idx ? 'primary.main' : 'grey.300',
-                        color: testimonialIndex === idx ? 'white' : 'grey.700',
-                        fontWeight: 700,
-                        fontSize: 18,
-                        boxShadow: testimonialIndex === idx ? 4 : 1,
-                        transition: 'all 0.2s',
-                        border: testimonialIndex === idx ? '2px solid #2563eb' : '2px solid transparent',
-                        '&:hover': {
-                          bgcolor: 'primary.light',
-                          color: 'white',
-                        },
-                      }}
-                    >
-                      {idx + 1}
-                    </Button>
-                  ))}
-                </Box>
               </Box>
             </Paper>
           </Grid>

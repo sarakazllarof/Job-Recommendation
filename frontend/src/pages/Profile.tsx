@@ -41,6 +41,12 @@ interface CV {
   created_at: string;
 }
 
+interface EditData {
+  username: string;
+  email: string;
+  bio: string;
+}
+
 function Profile() {
   const { user } = useAuth();
   const [cvs, setCvs] = useState<CV[]>([]);
@@ -49,7 +55,7 @@ function Profile() {
   const [uploadSuccess, setUploadSuccess] = useState(false);
   const navigate = useNavigate();
   const [editOpen, setEditOpen] = useState(false);
-  const [editData, setEditData] = useState({ username: user.username, email: user.email, bio: user.bio || '' });
+  const [editData, setEditData] = useState<EditData>({ username: '', email: '', bio: '' });
   const [editLoading, setEditLoading] = useState(false);
   const [editError, setEditError] = useState('');
 
@@ -80,6 +86,16 @@ function Profile() {
       }
     };
     fetchCVs();
+  }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      setEditData({
+        username: user.username,
+        email: user.email,
+        bio: user.bio || ''
+      });
+    }
   }, [user]);
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -115,20 +131,29 @@ function Profile() {
     setEditLoading(true);
     setEditError('');
     try {
-      const token = localStorage.getItem('token');
-      const res = await fetch('http://localhost:8000/auth/users/me', {
-        method: 'PUT',
+      if (!editData.username || !editData.email) {
+        throw new Error('Username and email are required');
+      }
+
+      const response = await axios.put('http://localhost:8000/auth/users/me', editData, {
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
-        body: JSON.stringify(editData),
       });
-      if (!res.ok) throw new Error('Failed to update profile');
       setEditOpen(false);
       window.location.reload(); // For simplicity, reload to update UI
-    } catch (err) {
-      setEditError('Failed to update profile');
+    } catch (err: any) {
+      console.error('Update error:', err.response?.data || err.message);
+      // Format the error message properly
+      const errorDetail = err.response?.data?.detail;
+      if (Array.isArray(errorDetail)) {
+        setEditError(errorDetail.map(err => err.msg).join(', '));
+      } else if (typeof errorDetail === 'string') {
+        setEditError(errorDetail);
+      } else {
+        setEditError(err.message || 'Failed to update profile');
+      }
     } finally {
       setEditLoading(false);
     }
