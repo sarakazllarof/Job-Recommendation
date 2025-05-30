@@ -13,6 +13,7 @@ class User(Base):
     hashed_password = Column(String(255), nullable=False)
     is_admin = Column(Boolean, default=False)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    bio = Column(Text, nullable=True)
     jobs = relationship('Job', back_populates='owner')
     recommendations = relationship('Recommendation', back_populates='user')
     cvs = relationship('CV', back_populates='user')

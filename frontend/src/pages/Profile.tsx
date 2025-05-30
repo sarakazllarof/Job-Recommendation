@@ -12,6 +12,7 @@ import {
   Stack,
   Card,
   CardContent,
+  Avatar,
 } from '@mui/material';
 import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
@@ -21,6 +22,17 @@ import EmailRoundedIcon from '@mui/icons-material/EmailRounded';
 import BadgeRoundedIcon from '@mui/icons-material/BadgeRounded';
 import WorkRoundedIcon from '@mui/icons-material/WorkRounded';
 import { useNavigate } from 'react-router-dom';
+import EmojiEmotionsRoundedIcon from '@mui/icons-material/EmojiEmotionsRounded';
+import EmojiEventsRoundedIcon from '@mui/icons-material/EmojiEventsRounded';
+import CheckCircleRoundedIcon from '@mui/icons-material/CheckCircleRounded';
+import TimelineRoundedIcon from '@mui/icons-material/TimelineRounded';
+import LinearProgress from '@mui/material/LinearProgress';
+import EditRoundedIcon from '@mui/icons-material/EditRounded';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
+import TextField from '@mui/material/TextField';
 
 interface CV {
   id: number;
@@ -36,6 +48,24 @@ function Profile() {
   const [error, setError] = useState('');
   const [uploadSuccess, setUploadSuccess] = useState(false);
   const navigate = useNavigate();
+  const [editOpen, setEditOpen] = useState(false);
+  const [editData, setEditData] = useState({ username: user.username, email: user.email, bio: user.bio || '' });
+  const [editLoading, setEditLoading] = useState(false);
+  const [editError, setEditError] = useState('');
+
+  // Mock data for new features
+  const bio = "Aspiring software engineer passionate about AI and web development. Always learning, always building!";
+  const profileCompletion = 80; // percent
+  const badges = [
+    { icon: <CheckCircleRoundedIcon color="success" />, label: 'CV Uploaded' },
+    { icon: <EmojiEventsRoundedIcon color="warning" />, label: 'Profile Complete' },
+    { icon: <TimelineRoundedIcon color="info" />, label: 'Active User' },
+  ];
+  const recentActivity = [
+    { text: 'Uploaded a new CV', date: '2024-05-30' },
+    { text: 'Updated profile information', date: '2024-05-28' },
+    { text: 'Applied to Frontend Developer job', date: '2024-05-25' },
+  ];
 
   useEffect(() => {
     const fetchCVs = async () => {
@@ -70,6 +100,40 @@ function Profile() {
     }
   };
 
+  const handleEditOpen = () => {
+    setEditData({ username: user.username, email: user.email, bio: user.bio || '' });
+    setEditOpen(true);
+  };
+  const handleEditClose = () => {
+    setEditOpen(false);
+    setEditError('');
+  };
+  const handleEditChange = (e) => {
+    setEditData({ ...editData, [e.target.name]: e.target.value });
+  };
+  const handleEditSave = async () => {
+    setEditLoading(true);
+    setEditError('');
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch('http://localhost:8000/auth/users/me', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(editData),
+      });
+      if (!res.ok) throw new Error('Failed to update profile');
+      setEditOpen(false);
+      window.location.reload(); // For simplicity, reload to update UI
+    } catch (err) {
+      setEditError('Failed to update profile');
+    } finally {
+      setEditLoading(false);
+    }
+  };
+
   if (!user) {
     return (
       <Container>
@@ -89,13 +153,13 @@ function Profile() {
   }
 
   return (
-    <Container maxWidth="md" sx={{ mt: 4 }}>
-      <Box sx={{ position: 'relative' }}>
-        {/* Playful SVG Illustration */}
+    <Container maxWidth="sm" sx={{ mt: 4 }}>
+      <Box sx={{ position: 'relative', minHeight: '60vh' }}>
+        {/* Enhanced SVG Blob Background */}
         <Box sx={{
           position: 'absolute',
-          top: { xs: 0, md: -40 },
-          right: { xs: -40, md: -80 },
+          top: { xs: -40, md: -60 },
+          left: { xs: -40, md: -80 },
           width: { xs: 180, md: 320 },
           height: { xs: 180, md: 320 },
           zIndex: 0,
@@ -111,51 +175,121 @@ function Profile() {
             <rect x="200" y="220" width="40" height="12" rx="6" fill="#fff" opacity="0.4" />
           </svg>
         </Box>
-        <Paper elevation={6} sx={{ borderRadius: 6, p: { xs: 2, sm: 5 }, background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)', boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.10)', position: 'relative', zIndex: 1 }}>
-          <Box sx={{ mb: 4, textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2 }}>
-            <BadgeRoundedIcon color="primary" sx={{ fontSize: 40 }} />
-            <Typography variant="h3" fontWeight={900} color="primary" gutterBottom letterSpacing={1}>
-              Profile
+        <Paper elevation={8} sx={{ borderRadius: 6, p: { xs: 2, sm: 3 }, background: 'rgba(255,255,255,0.90)', backdropFilter: 'blur(10px)', boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.18)', position: 'relative', zIndex: 1, border: '2px solid #2563eb', maxWidth: 700, mx: 'auto' }}>
+          {/* Personalized Greeting */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+            <Typography variant="h5" fontWeight={700} color="primary.main">
+              Welcome back, {user.username}!
             </Typography>
+            <EmojiEmotionsRoundedIcon color="warning" sx={{ fontSize: 32 }} />
           </Box>
-          <Grid container spacing={5} alignItems="stretch">
+          {/* Profile Completion Progress */}
+          <Box sx={{ mb: 2 }}>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+              Profile Completion: {profileCompletion}%
+            </Typography>
+            <LinearProgress variant="determinate" value={profileCompletion} sx={{ height: 10, borderRadius: 5, background: '#e0e7ef', '& .MuiLinearProgress-bar': { background: 'linear-gradient(90deg, #2563eb 0%, #7c3aed 100%)' } }} />
+          </Box>
+          {/* Badges */}
+          <Box sx={{ display: 'flex', gap: 2, mb: 3, flexWrap: 'wrap' }}>
+            {badges.map((badge, idx) => (
+              <Box key={idx} sx={{ display: 'flex', alignItems: 'center', gap: 1, bgcolor: '#f3f6fa', px: 2, py: 1, borderRadius: 3, boxShadow: 1, fontWeight: 600, fontSize: 15 }}>
+                {badge.icon}
+                {badge.label}
+              </Box>
+            ))}
+          </Box>
+          <Grid container spacing={3} alignItems="stretch">
             {/* User Info */}
             <Grid item xs={12} md={5}>
-              <Paper elevation={0} sx={{ p: 3, borderRadius: 4, bgcolor: 'background.paper', mb: 2, boxShadow: '0 2px 12px 0 rgba(31, 38, 135, 0.06)' }}>
+              <Paper elevation={0} sx={{ p: 3, borderRadius: 4, bgcolor: 'rgba(255,255,255,0.97)', mb: 2, boxShadow: '0 2px 12px 0 rgba(31, 38, 135, 0.10)', borderLeft: '6px solid #2563eb', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, position: 'relative' }}>
+                <Avatar sx={{ width: 70, height: 70, bgcolor: 'primary.main', fontSize: 32, mb: 2 }}>
+                  {user.username ? user.username[0].toUpperCase() : <AccountCircleRoundedIcon fontSize="large" />}
+                </Avatar>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  startIcon={<EditRoundedIcon />}
+                  sx={{ position: 'absolute', top: 12, right: 12, borderRadius: 99, fontWeight: 700, fontSize: 14, px: 2, py: 0.5 }}
+                  onClick={handleEditOpen}
+                >
+                  Edit
+                </Button>
                 <Box display="flex" alignItems="center" gap={1} mb={1}>
-                  <AccountCircleRoundedIcon color="primary" sx={{ fontSize: 28 }} />
+                  <AccountCircleRoundedIcon color="primary" sx={{ fontSize: 24 }} />
                   <Typography variant="h6" fontWeight={800} color="primary.dark" sx={{ letterSpacing: 0.5 }}>
                     User Information
                   </Typography>
                 </Box>
-                <Divider sx={{ mb: 2, height: 4, border: 'none', background: 'linear-gradient(90deg, #2563eb 0%, #7c3aed 100%)', borderRadius: 2 }} />
+                <Divider sx={{ mb: 2, height: 3, border: 'none', background: 'linear-gradient(90deg, #2563eb 0%, #7c3aed 100%)', borderRadius: 2 }} />
                 <Box display="flex" alignItems="center" gap={1} mb={1}>
-                  <BadgeRoundedIcon color="action" sx={{ fontSize: 20 }} />
+                  <BadgeRoundedIcon color="action" sx={{ fontSize: 18 }} />
                   <Typography sx={{ fontWeight: 600 }}><b>Username:</b> <span style={{ fontWeight: 400 }}>{user.username}</span></Typography>
                 </Box>
                 <Box display="flex" alignItems="center" gap={1}>
-                  <EmailRoundedIcon color="action" sx={{ fontSize: 20 }} />
+                  <EmailRoundedIcon color="action" sx={{ fontSize: 18 }} />
                   <Typography sx={{ fontWeight: 600 }}><b>Email:</b> <span style={{ fontWeight: 400 }}>{user.email}</span></Typography>
                 </Box>
+                {/* Bio/About Section */}
+                <Divider sx={{ my: 2, height: 2, border: 'none', background: '#e0e7ef', borderRadius: 1 }} />
+                <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', fontStyle: 'italic' }}>
+                  {bio}
+                </Typography>
+                {/* Edit Profile Dialog */}
+                <Dialog open={editOpen} onClose={handleEditClose} maxWidth="xs" fullWidth>
+                  <DialogTitle>Edit Profile</DialogTitle>
+                  <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
+                    <TextField
+                      label="Username"
+                      name="username"
+                      value={editData.username}
+                      onChange={handleEditChange}
+                      fullWidth
+                    />
+                    <TextField
+                      label="Email"
+                      name="email"
+                      value={editData.email}
+                      onChange={handleEditChange}
+                      fullWidth
+                    />
+                    <TextField
+                      label="Bio"
+                      name="bio"
+                      value={editData.bio}
+                      onChange={handleEditChange}
+                      fullWidth
+                      multiline
+                      minRows={2}
+                    />
+                    {editError && <Alert severity="error">{editError}</Alert>}
+                  </DialogContent>
+                  <DialogActions>
+                    <Button onClick={handleEditClose} disabled={editLoading}>Cancel</Button>
+                    <Button onClick={handleEditSave} variant="contained" disabled={editLoading}>
+                      Save
+                    </Button>
+                  </DialogActions>
+                </Dialog>
               </Paper>
             </Grid>
             {/* CV Management */}
             <Grid item xs={12} md={7}>
-              <Paper elevation={0} sx={{ p: 3, borderRadius: 4, bgcolor: 'background.paper', boxShadow: '0 2px 12px 0 rgba(31, 38, 135, 0.06)' }}>
+              <Paper elevation={0} sx={{ p: 3, borderRadius: 4, bgcolor: 'rgba(255,255,255,0.97)', boxShadow: '0 2px 12px 0 rgba(31, 38, 135, 0.10)', borderLeft: '6px solid #7c3aed', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, height: '100%' }}>
                 <Box display="flex" alignItems="center" gap={1} mb={1}>
-                  <WorkRoundedIcon color="primary" sx={{ fontSize: 28 }} />
+                  <WorkRoundedIcon color="primary" sx={{ fontSize: 24 }} />
                   <Typography variant="h6" fontWeight={800} color="primary.dark" sx={{ letterSpacing: 0.5 }}>
                     CV Management
                   </Typography>
                 </Box>
-                <Divider sx={{ mb: 2, height: 4, border: 'none', background: 'linear-gradient(90deg, #2563eb 0%, #7c3aed 100%)', borderRadius: 2 }} />
+                <Divider sx={{ mb: 2, height: 3, border: 'none', background: 'linear-gradient(90deg, #2563eb 0%, #7c3aed 100%)', borderRadius: 2 }} />
                 {error && (
                   <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>
                 )}
                 {uploadSuccess && (
                   <Alert severity="success" sx={{ mb: 2 }}>CV uploaded successfully!</Alert>
                 )}
-                <Box sx={{ mb: 4, textAlign: 'center' }}>
+                <Box sx={{ mb: 3, textAlign: 'center' }}>
                   <input
                     accept=".pdf,.doc,.docx"
                     style={{ display: 'none' }}
@@ -164,36 +298,36 @@ function Profile() {
                     onChange={handleFileUpload}
                   />
                   <label htmlFor="cv-upload">
-                    <Button variant="contained" component="span" startIcon={<InsertDriveFileRoundedIcon />} sx={{ borderRadius: 99, fontWeight: 700, fontSize: 18, px: 4, py: 1.5, boxShadow: 3 }}>
+                    <Button variant="contained" component="span" startIcon={<InsertDriveFileRoundedIcon />} sx={{ borderRadius: 99, fontWeight: 700, fontSize: 16, px: 3, py: 1, boxShadow: 3, transition: 'transform 0.2s, box-shadow 0.2s', '&:hover': { transform: 'scale(1.05)', boxShadow: 6 } }}>
                       Upload CV
                     </Button>
                   </label>
                 </Box>
                 {cvs.length > 0 ? (
-                  <Stack spacing={3}>
+                  <Stack spacing={2} sx={{ width: '100%' }}>
                     {cvs.map((cv) => (
-                      <Card key={cv.id} elevation={2} sx={{ borderRadius: 4, transition: 'transform 0.2s, box-shadow 0.2s', boxShadow: '0 4px 24px 0 rgba(31, 38, 135, 0.08)', '&:hover': { transform: 'translateY(-4px)', boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.12)' }, bgcolor: '#f8fafc' }}>
-                        <CardContent>
-                          <Box display="flex" alignItems="center" gap={2}>
-                            <InsertDriveFileRoundedIcon color="primary" sx={{ fontSize: 36 }} />
-                            <Box>
-                              <Typography fontWeight={700} fontSize={18}>{cv.filename}</Typography>
-                              <Typography variant="caption" color="text.secondary">
-                                Uploaded on {new Date(cv.created_at).toLocaleDateString()} | {cv.file_type.toUpperCase()}
-                              </Typography>
-                            </Box>
-                          </Box>
-                          <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
-                            <Button
-                              variant="contained"
-                              color="primary"
-                              onClick={() => navigate(`/cv/${cv.id}`)}
-                              sx={{ borderRadius: 99, fontWeight: 700, px: 3, py: 1 }}
-                            >
-                              View Details
-                            </Button>
+                      <Card key={cv.id} elevation={2} sx={{ borderRadius: 3, transition: 'transform 0.2s, box-shadow 0.2s', boxShadow: '0 4px 24px 0 rgba(31, 38, 135, 0.10)', '&:hover': { transform: 'translateY(-4px) scale(1.03)', boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.16)' }, bgcolor: '#f8fafc', display: 'flex', alignItems: 'center', px: 1 }}>
+                        <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2, p: 1 }}>
+                          <Avatar sx={{ bgcolor: 'secondary.main', width: 40, height: 40, mr: 1 }}>
+                            <InsertDriveFileRoundedIcon />
+                          </Avatar>
+                          <Box>
+                            <Typography fontWeight={700} fontSize={16}>{cv.filename}</Typography>
+                            <Typography variant="caption" color="text.secondary">
+                              Uploaded on {new Date(cv.created_at).toLocaleDateString()} | {cv.file_type.toUpperCase()}
+                            </Typography>
                           </Box>
                         </CardContent>
+                        <Box sx={{ pr: 1 }}>
+                          <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={() => navigate(`/cv/${cv.id}`)}
+                            sx={{ borderRadius: 99, fontWeight: 700, px: 2, py: 0.5, fontSize: 14, transition: 'transform 0.2s, box-shadow 0.2s', '&:hover': { transform: 'scale(1.07)', boxShadow: 6 } }}
+                          >
+                            View Details
+                          </Button>
+                        </Box>
                       </Card>
                     ))}
                   </Stack>
@@ -202,6 +336,21 @@ function Profile() {
                     No CVs uploaded yet. Upload your CV to get job recommendations.
                   </Typography>
                 )}
+              </Paper>
+            </Grid>
+            {/* Recent Activity */}
+            <Grid item xs={12}>
+              <Paper elevation={0} sx={{ mt: 2, p: 2, borderRadius: 3, bgcolor: '#f3f6fa', boxShadow: '0 1px 6px 0 rgba(31, 38, 135, 0.06)', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 1 }}>
+                <Typography variant="subtitle1" fontWeight={700} color="primary" sx={{ mb: 1 }}>
+                  Recent Activity
+                </Typography>
+                {recentActivity.map((activity, idx) => (
+                  <Box key={idx} sx={{ display: 'flex', alignItems: 'center', gap: 1, color: 'text.secondary', fontSize: 15 }}>
+                    <TimelineRoundedIcon color="info" sx={{ fontSize: 18 }} />
+                    <span>{activity.text}</span>
+                    <span style={{ fontSize: 13, marginLeft: 8, color: '#888' }}>{activity.date}</span>
+                  </Box>
+                ))}
               </Paper>
             </Grid>
           </Grid>

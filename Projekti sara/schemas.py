@@ -2,6 +2,28 @@ from pydantic import BaseModel, EmailStr, ConfigDict
 from typing import List, Optional
 import datetime
 
+class UserBase(BaseModel):
+    username: str
+    email: EmailStr
+    bio: Optional[str] = None
+
+class UserCreate(UserBase):
+    password: str
+
+class UserResponse(UserBase):
+    id: int
+    is_admin: bool
+    created_at: str
+    bio: Optional[str] = None
+
+    class Config:
+        orm_mode = True
+
+class UserUpdate(BaseModel):
+    username: Optional[str] = None
+    email: Optional[EmailStr] = None
+    bio: Optional[str] = None
+
 class UserSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     id: int

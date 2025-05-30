@@ -25,5 +25,8 @@ def get_db():
     try:
         yield db
     finally:
-        db.close() 
+        db.close()
+
+# NOTE: After adding the 'bio' field to the User model, run a migration to update the database schema.
+# For SQLite, you may need to manually alter the table or recreate it if not using Alembic. 
 

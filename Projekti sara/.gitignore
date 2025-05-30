@@ -1,56 +1,52 @@
 # Python
 __pycache__/
 *.py[cod]
-*$py.class
-*.so
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-
-# Virtual Environment
-venv/
-ENV/
-env/
-.env
-
-# IDE specific files
-.idea/
-.vscode/
-*.swp
-*.swo
-.DS_Store
-
-# Database
-*.db
+*.pyo
+*.pyd
 *.sqlite3
+*.db
+*.egg-info/
+.DS_Store
+.env
+.venv/
+venv/
+
+# FastAPI/Starlette
+instance/
+
+# VSCode
+.vscode/
+
+# Node/Frontend
+node_modules/
+build/
+dist/
+frontend/node_modules/
+frontend/build/
+frontend/dist/
+
+# OS
+Thumbs.db
 
 # Logs
 *.log
 
-# Local development settings
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+# Misc
+*.bak
+*.swp
 
-# Coverage reports
+# Pytest
+.cache/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Coverage
 htmlcov/
-.tox/
 .coverage
-.coverage.*
-.cache
-coverage.xml
-*.cover 
+
+# React
+frontend/.env
+
+# Ignore uploads (if not needed in repo)
+uploads/ 

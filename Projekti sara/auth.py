@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Path
+from fastapi import APIRouter, Depends, HTTPException, status, Path, Request, Body
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
 from passlib.context import CryptContext
@@ -12,6 +12,7 @@ from sqlalchemy import func, desc
 from database import get_db
 from models import User, Job, Recommendation, CV
 from schemas import UserSchema
+from utils import get_password_hash, verify_password, create_access_token, get_current_user
 
 # JWT settings
 SECRET_KEY = "your-secret-key"  # Change this to a secure secret key
@@ -48,6 +49,7 @@ class UserUpdate(BaseModel):
     username: str
     email: EmailStr
     is_admin: bool
+    bio: Optional[str] = None
 
 # Helper functions
 def verify_password(plain_password, hashed_password):
@@ -203,3 +205,24 @@ def get_admin_stats(current_user: User = Depends(get_current_user), db: Session 
         "top_skills": top_skills,
         "top_locations": top_locations,
     }
+
+@router.put("/users/me", response_model=UserResponse)
+def update_user_profile(
+    user_update: UserUpdate = Body(...),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    user = db.query(User).filter(User.id == current_user.id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    if user_update.username is not None:
+        user.username = user_update.username
+    if user_update.email is not None:
+        user.email = user_update.email
+    if user_update.is_admin is not None:
+        user.is_admin = user_update.is_admin
+    if user_update.bio is not None:
+        user.bio = user_update.bio
+    db.commit()
+    db.refresh(user)
+    return user

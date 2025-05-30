@@ -6,6 +6,7 @@ from jobs import router as jobs_router
 from job_search import router as job_search_router
 from database import engine
 from models import Base
+import auth
 
 # Create FastAPI app
 app = FastAPI(title="Job Recommendation API")
@@ -28,6 +29,7 @@ app.include_router(auth_router, prefix="/auth", tags=["auth"])
 app.include_router(cv_router, prefix="/cv", tags=["cv"])
 app.include_router(jobs_router, tags=["jobs"])
 app.include_router(job_search_router, prefix="/job-search", tags=["job_search"])
+app.include_router(auth.router)
 
 # Create database tables
 Base.metadata.create_all(bind=engine)

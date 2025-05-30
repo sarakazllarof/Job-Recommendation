@@ -8,9 +8,49 @@ import CloudUploadRoundedIcon from '@mui/icons-material/CloudUploadRounded';
 import EmojiObjectsRoundedIcon from '@mui/icons-material/EmojiObjectsRounded';
 import WorkOutlineRoundedIcon from '@mui/icons-material/WorkOutlineRounded';
 import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
+import Tooltip from '@mui/material/Tooltip';
+import Fade from '@mui/material/Fade';
+import Carousel from 'react-material-ui-carousel';
+import Slider from 'react-slick';
+import 'slick-carousel/slick/slick.css';
+import 'slick-carousel/slick/slick-theme.css';
+import { useState, useRef } from 'react';
+
+const testimonials = [
+  {
+    name: 'Sara K.',
+    text: 'I found my dream job within a week! The recommendations were spot on.',
+  },
+  {
+    name: 'Matias D.',
+    text: 'Uploading my CV was so easy, and I got matched with great companies.',
+  },
+  {
+    name: 'John Smith',
+    text: 'The platform helped me land a job at a top tech company. Great experience!',
+  },
+  {
+    name: 'Emma Johnson',
+    text: 'I love how personalized the job recommendations are. It made my job search so much easier.',
+  },
+  {
+    name: 'Michael Brown',
+    text: 'The user interface is intuitive and the support team is very helpful.',
+  },
+  {
+    name: 'Sophia Lee',
+    text: 'I was able to find a job that perfectly matches my skills and interests.',
+  },
+  {
+    name: 'David Wilson',
+    text: 'The analytics dashboard is a game-changer for tracking my job search progress.',
+  },
+];
 
 const Home: React.FC = () => {
   const { user } = useAuth();
+  const [testimonialIndex, setTestimonialIndex] = useState(0);
+  const sliderRef = useRef<any>(null);
 
   return (
     <Box
@@ -174,64 +214,152 @@ const Home: React.FC = () => {
               <Typography variant="h4" sx={{ mb: 4, textAlign: 'center', fontWeight: 600, zIndex: 1, position: 'relative' }}>
                 How It Works
               </Typography>
-              <Grid container spacing={3}>
-                {[
-                  {
-                    title: 'Create Account',
-                    description: 'Sign up and create your professional profile',
-                    color: '#2563eb',
-                    icon: <PersonAddAltRoundedIcon sx={{ color: '#2563eb' }} fontSize="large" />,
-                  },
-                  {
-                    title: 'Upload CV',
-                    description: 'Upload your CV to get personalized recommendations',
-                    color: '#7c3aed',
-                    icon: <CloudUploadRoundedIcon sx={{ color: '#7c3aed' }} fontSize="large" />,
-                  },
-                  {
-                    title: 'Get Matched',
-                    description: 'Receive job recommendations based on your profile',
-                    color: '#2563eb',
-                    icon: <EmojiObjectsRoundedIcon sx={{ color: '#2563eb' }} fontSize="large" />,
-                  },
-                ].map((step, index) => (
-                  <Grid item xs={12} key={index}>
-                    <Box
+              <Box sx={{ position: 'relative', mb: 4 }}>
+                {/* Decorative SVG connector */}
+                <Box sx={{ position: 'absolute', top: 48, left: 0, right: 0, zIndex: 0, display: { xs: 'none', md: 'block' } }}>
+                  <svg width="100%" height="32" viewBox="0 0 900 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <line x1="80" y1="16" x2="820" y2="16" stroke="#e0e7ef" strokeWidth="4" strokeDasharray="12 12" />
+                  </svg>
+                </Box>
+                <Grid container spacing={4} justifyContent="center" alignItems="flex-start" sx={{ position: 'relative', zIndex: 1 }}>
+                  {[
+                    {
+                      icon: <PersonAddAltRoundedIcon sx={{ fontSize: 40, color: 'primary.main', transition: 'transform 0.2s', '&:hover': { transform: 'scale(1.2)' } }} />,
+                      title: 'Create Account',
+                      desc: 'Sign up and create your professional profile',
+                      tooltip: 'Start by creating your free account.',
+                    },
+                    {
+                      icon: <CloudUploadRoundedIcon sx={{ fontSize: 40, color: 'secondary.main', transition: 'transform 0.2s', '&:hover': { transform: 'scale(1.2)' } }} />,
+                      title: 'Upload CV',
+                      desc: 'Upload your CV to get personalized recommendations',
+                      tooltip: 'Upload your latest CV for best results.',
+                    },
+                    {
+                      icon: <EmojiObjectsRoundedIcon sx={{ fontSize: 40, color: 'info.main', transition: 'transform 0.2s', '&:hover': { transform: 'scale(1.2)' } }} />,
+                      title: 'Get Matched',
+                      desc: 'Receive job recommendations based on your profile',
+                      tooltip: 'Our AI matches you with the best jobs.',
+                    },
+                  ].map((step, idx) => (
+                    <Grid item xs={12} md={4} key={step.title}>
+                      <Fade in timeout={600 + idx * 200}>
+                        <Box
+                          tabIndex={0}
+                          aria-label={`Step ${idx + 1}: ${step.title}`}
+                          sx={{
+                            bgcolor: 'white',
+                            borderRadius: 4,
+                            boxShadow: 3,
+                            p: 4,
+                            textAlign: 'center',
+                            transition: 'box-shadow 0.2s, transform 0.2s',
+                            outline: 'none',
+                            '&:hover, &:focus': {
+                              boxShadow: 6,
+                              transform: 'translateY(-4px) scale(1.03)',
+                            },
+                          }}
+                        >
+                          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 2 }}>
+                            <Box
+                              sx={{
+                                width: 32,
+                                height: 32,
+                                borderRadius: '50%',
+                                bgcolor: 'primary.main',
+                                color: 'white',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontWeight: 700,
+                                fontSize: 18,
+                                mb: 1,
+                              }}
+                            >
+                              {idx + 1}
+                            </Box>
+                            <Tooltip title={step.tooltip} arrow>
+                              <span>{step.icon}</span>
+                            </Tooltip>
+                          </Box>
+                          <Typography variant="h5" fontWeight={700} gutterBottom>
+                            {step.title}
+                          </Typography>
+                          <Typography color="text.secondary">{step.desc}</Typography>
+                        </Box>
+                      </Fade>
+                    </Grid>
+                  ))}
+                </Grid>
+              </Box>
+              <Box textAlign="center" mt={4}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  size="large"
+                  sx={{ borderRadius: 3, fontWeight: 700, px: 5, py: 1.5 }}
+                  component={RouterLink}
+                  to="/register"
+                >
+                  Get Started
+                </Button>
+              </Box>
+              {/* Testimonials Carousel */}
+              <Box mt={8}>
+                <Typography variant="h4" fontWeight={700} align="center" mb={3}>
+                  Success Stories
+                </Typography>
+                <Slider
+                  dots={false}
+                  infinite={true}
+                  speed={500}
+                  slidesToShow={1}
+                  slidesToScroll={1}
+                  arrows={false}
+                  autoplay={true}
+                  autoplaySpeed={6000}
+                  beforeChange={(_: number, next: number) => setTestimonialIndex(next)}
+                  afterChange={setTestimonialIndex}
+                  ref={sliderRef}
+                >
+                  {testimonials.map((t, i) => (
+                    <Paper key={i} sx={{ p: 4, borderRadius: 4, boxShadow: 2, textAlign: 'center', bgcolor: 'white', minHeight: 140, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                      <Typography variant="h6" fontWeight={700} mb={1}>
+                        {t.name}
+                      </Typography>
+                      <Typography color="text.secondary">{t.text}</Typography>
+                    </Paper>
+                  ))}
+                </Slider>
+                <Box display="flex" justifyContent="center" alignItems="center" gap={2} mt={3}>
+                  {testimonials.map((_, idx) => (
+                    <Button
+                      key={idx}
+                      onClick={() => sliderRef.current && sliderRef.current.slickGoTo(idx)}
                       sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 2,
-                        p: 2,
-                        borderRadius: '16px',
-                        background: 'rgba(255, 255, 255, 0.5)',
-                        border: '1px solid rgba(0, 0, 0, 0.1)',
+                        width: 32,
+                        height: 32,
+                        minWidth: 0,
+                        borderRadius: '50%',
+                        bgcolor: testimonialIndex === idx ? 'primary.main' : 'grey.300',
+                        color: testimonialIndex === idx ? 'white' : 'grey.700',
+                        fontWeight: 700,
+                        fontSize: 18,
+                        boxShadow: testimonialIndex === idx ? 4 : 1,
+                        transition: 'all 0.2s',
+                        border: testimonialIndex === idx ? '2px solid #2563eb' : '2px solid transparent',
+                        '&:hover': {
+                          bgcolor: 'primary.light',
+                          color: 'white',
+                        },
                       }}
                     >
-                      <Box
-                        sx={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          width: 48,
-                          height: 48,
-                          borderRadius: '12px',
-                          background: `${step.color}15`,
-                        }}
-                      >
-                        {step.icon}
-                      </Box>
-                      <Box>
-                        <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5 }}>
-                          {step.title}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          {step.description}
-                        </Typography>
-                      </Box>
-                    </Box>
-                  </Grid>
-                ))}
-              </Grid>
+                      {idx + 1}
+                    </Button>
+                  ))}
+                </Box>
+              </Box>
             </Paper>
           </Grid>
         </Grid>
